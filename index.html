@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url(mountain-sunset-art-wallpaper-3440x1440_15\ \(1\).jpg);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+                .container {
+            max-width: 400px;;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0); 
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(106, 105, 105, 0.1);
+            transition: transform 0.3s ease;
+            transform: translateY(50px);
+            z-index: 1;
+            text-align: center;
+        }
+
+        .container h1,
+        .container p,
+        .container input,
+        .container button {
+            background-color: none;
+            padding: 10px;
+            margin: 10px auto;
+            border-radius: 5px;
+        }
+
+        .container button {
+            background-color: #0156b1;
+            color: #ffffff;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .container button:hover {
+            background-color: #013e86;
+        }
+
+        .container button.searching {
+            background-color: #e62e00;
+        }
+
+        .container button.searching:hover {
+            background-color: #c51c00;
+        }
+
+        
+        h1 {
+            color: #074e61;
+        }
+        #location {
+            font-size: 18px;
+        }
+        #temperature {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        #additionalInfo {
+            margin-top: 10px;
+        }
+        #search {
+            width: 80%;
+            padding: 10px;
+            margin: 10px auto;
+            font-size: 16px;
+            background-color: #FFF8DC;
+        }
+        #searchButton {
+            background-color: #0156b1;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        #searchButton:hover {
+            background-color: #013e86;
+        }
+
+        #searchButton.searching {
+            background-color: #e62e00; 
+        }
+
+        #searchButton.searching:hover {
+            background-color: #c51c00;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+        <input type="text" id="search" placeholder="Enter location">
+        <button id="searchButton">Search</button>
+        <p id="location">Enter a location to get weather information.</p>
+        <p id="temperature"></p>
+        <div id="additionalInfo">
+        </div>
+    </div>
+
+    <script>
+
+async function fetchWeather(location) {
+    const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${encodeURIComponent(location)}`;
+    const options = {
+        method: 'GET',
+        headers: {
+            'X-RapidAPI-Key': 'e750805a40msh42a931ec44be007p109d74jsnba66f6685fa2',
+            'X-RapidAPI-Host': 'weatherapi-com.p.rapidapi.com'
+        }
+    };
+
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error("Weather data not available for this location.");
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+
+async function updateWeather() {
+    const locationElement = document.getElementById("location");
+    const temperatureElement = document.getElementById("temperature");
+    const additionalInfoElement = document.getElementById("additionalInfo");
+
+    
+    const locationInput = document.getElementById("search").value;
+
+    if (!locationInput) {
+        alert("Please enter a location.");
+        return;
+    }
+
+    locationElement.textContent = "Loading...";
+    temperatureElement.textContent = "Not Found!";
+    additionalInfoElement.innerHTML = "";
+
+    const weatherData = await fetchWeather(locationInput);
+
+    if (weatherData && weatherData.error) {
+        locationElement.textContent = "Location not found";
+        temperatureElement.textContent = "";
+    } else if (weatherData) {
+        locationElement.textContent = `Location: ${weatherData.location.name}, ${weatherData.location.country}`;
+        temperatureElement.textContent = `Temperature: ${weatherData.current.temp_c}°C`;
+
+        additionalInfoElement.innerHTML = `
+            <p>Humidity: ${weatherData.current.humidity}%</p>
+            <p>Wind Speed: ${weatherData.current.wind_kph} km/h</p>
+            <p>Weather Condition: ${weatherData.current.condition.text}</p>
+        `;
+    }
+}
+       
+        const searchButton = document.getElementById("searchButton");
+        searchButton.addEventListener("click", updateWeather);
+    </script>
+</body>
+</html>
